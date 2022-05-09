@@ -17,9 +17,10 @@ class Car{
 void mainSide();
 void lobby();
 bool userRecognition();
-bool checkUserData(std::string userNameToMatch);
-void log_in();
-void sign_up();
+bool lookingForUserName(std::string userNameToMatch);
+bool isUserNameMatchWithPassword(std::string userNameToMatch, std::string userPasswordToMatch);
+bool log_in();
+bool sign_up();
 
 
 #endif RENTALSERVICESYSTEM_RENTALSERVICESYSTEM_H

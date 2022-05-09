@@ -23,12 +23,10 @@ bool userRecognition(){
     switch(activity) {
         case 1:
             std::cout << "Activity number: " << activity << " - LOG IN" << std::endl;
-            log_in();
-            break;
+            return log_in();
         case 2:
             std::cout << "Activity number: " << activity << " -  SIGN UP" << std::endl;
-            sign_up();
-            break;
+            return sign_up();
         case 3:
             std::cout << "Activity number: " << activity << " - EXIT" << std::endl;
             exit(0);
@@ -38,7 +36,6 @@ bool userRecognition(){
 }
 
  void lobby() {
-     std::cout << "Welcome to Rental Service System!" << std::endl;
      std::cout << "Type number to choose activity: " << std::endl;
      std::cout << "1: List of cars" << std::endl;
      std::cout << "2: Status of car" << std::endl;
@@ -68,30 +65,48 @@ bool userRecognition(){
      }
  }
 
-bool checkUserData(std::string userNameToMatch)
-{
-    std::map<std::string, std::string> userData;
+bool lookingForUserName(std::string userNameToMatch){
+    //std::fstream file("UserData.txt", std::ios::in | std::ios::out | std::ios::app);
+    //file.close();
 
-    std::fstream file("UserData.txt", std::ios::in | std::ios::out | std::ios::app);
-    file.close();
+    std::map<std::string, std::string> userData;
     std::ifstream infile("UserData.txt");
     std::string userName, password;
 
     while (std::getline(infile, userName) && std::getline(infile, password)){
         userData.insert ( std::pair<std::string, std::string>(userName, password));
     }
-
     infile.close();
-
-    // for (const auto& p : userData)
-    //    std::cout << p.first << " : " << p.second << std::endl;
-    // std::cout << std::endl;
 
     auto ret = userData.find(userNameToMatch);
     if (ret != userData.cend()) {
-        //std::cout << userNameToMatch << " : " << ret->second << std::endl;
-        std::cout << "Name is taken." << std::endl;
         return true;
+    }
+    else {
+        return false;
+    }
+
+}
+
+bool isUserNameMatchWithPassword(std::string userNameToMatch, std::string userPasswordToMatch){
+    std::map<std::string, std::string> userData;
+    std::ifstream infile("UserData.txt");
+    std::string userName, password;
+
+    while (std::getline(infile, userName) && std::getline(infile, password)){
+        userData.insert ( std::pair<std::string, std::string>(userName, password));
+    }
+    infile.close();
+
+    auto ret = userData.find(userNameToMatch);
+    if (ret != userData.cend()) {
+        if(ret->second == userPasswordToMatch){
+            std::cout << "User name match with password!" << std::endl;
+            return true;
+        } else {
+            std::cout << "User name does not match with password." << std::endl;
+            return false;
+        }
     }
     else {
         std::cout << "Name is ready to use." << std::endl;
@@ -100,23 +115,40 @@ bool checkUserData(std::string userNameToMatch)
 
 }
 
-     void log_in(){
+     bool log_in(){
          std::cout << "Enter your user name: " << std::endl;
          std::string userName;
          std::cin >> userName;
+         if(!(lookingForUserName(userName))){
+             std::cout << "This name is not used, try again or sign up." << std::endl;
+             return false;
+         } else {
+             std::cout << "Correct name, type your password"  << std::endl;
+         }
+         std::cout << "Enter your password: " << std::endl;
+         std::string password;
+         std::cin >> password;
+         if(isUserNameMatchWithPassword(userName, password)){
+             std::cout << "Hello " << userName << " welcome to our service!" << std::endl;
+             return true;
+         } else {
+             std::cout << "User name does not match with password" << std::endl;
+             return false;
+         }
+
      }
 
 
 
-     void sign_up(){
+     bool sign_up(){
          std::cout << "Enter your user name: " << std::endl;
          std::string userName;
          std::cin >> userName;
-         if(!(checkUserData(userName))){
+         if(!(lookingForUserName(userName))){
             std::cout << "Name is not taken." << std::endl;
          } else {
             std::cout << "Name is already taken, try again with other user name."  << std::endl;
-            sign_up();
+            return false;
          }
          std::cout << "Enter your password: " << std::endl;
          std::string password;
@@ -130,10 +162,10 @@ bool checkUserData(std::string userNameToMatch)
              file << userName << std::endl;
              file << password << std::endl;
              file.close();
-             mainSide();
+             return true;
          } else {
              std::cout << "Passwords does not match, try again." << std::endl;
-             sign_up();
+             return false;
          }
 
      }
