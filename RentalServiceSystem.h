@@ -2,19 +2,24 @@
 #define RENTALSERVICESYSTEM_RENTALSERVICESYSTEM_H
 #include <list>
 
-class Customer{
-    std::string name;
+class User{
+    std::string userName;
     std::string password;
     std::list<std::string> carRentalHistory;
 public:
-    Customer();
+    User(std::string username, std::string password);
 };
 
 class Car{
 
 };
 
+void mainSide();
 void lobby();
-bool customerRecognition();
+bool userRecognition();
+bool checkUserData(std::string userNameToMatch);
+void log_in();
+void sign_up();
+
 
 #endif RENTALSERVICESYSTEM_RENTALSERVICESYSTEM_H

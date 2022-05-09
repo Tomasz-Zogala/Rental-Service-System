@@ -2,7 +2,7 @@
 #include "RentalServiceSystem.h"
 
 int main() {
-    lobby();
+    mainSide();
 
     return 0;
 }
