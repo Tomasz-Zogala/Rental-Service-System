@@ -109,7 +109,7 @@ bool isUserNameMatchWithPassword(std::string userNameToMatch, std::string userPa
         }
     }
     else {
-        std::cout << "Name is ready to use." << std::endl;
+        std::cout << "Name is ready to use" << std::endl;
         return false;
     }
 
