@@ -2,7 +2,6 @@
 #include "RentalServiceSystem.h"
 
 int main() {
-
     garage();
     mainSide();
 
