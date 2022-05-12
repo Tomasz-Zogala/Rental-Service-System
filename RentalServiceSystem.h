@@ -16,6 +16,8 @@ public:
     void currentRent(std::string rent);
 };
 
+void printWithoutStatus(std::string fileName);
+
 void mainSide();
 
 void lobby();
@@ -40,15 +42,14 @@ void garage();
 
 void rentCar();
 
-void rentedCarsList();
+void printCurrentRent();
 
 void returnCar();
 
-void logOfActivities(std::string car, std::string rentOrReturn);
+void logs(std::string car, std::string rentOrReturn);
 
-void showYourRentHistory();
+void printHistoryRent();
 
-void showLogs();
-
+void printLogs();
 
 #endif RENTALSERVICESYSTEM_RENTALSERVICESYSTEM_H
