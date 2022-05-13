@@ -31,6 +31,15 @@ void garage() {
     addCarToData("Mercedes-Benz S-Class", "garage");
 }
 
+void addCarToData(std::string carModel, std::string carStatus) {
+    std::fstream file("CarsData.txt", std::ios::in | std::ios::out | std::ios::app);
+    if (findCarAndItStatus(carModel) == 3) {
+        file << carModel << std::endl;
+        file << carStatus << std::endl;
+        file.close();
+    }
+}
+
 bool userRecognition() {
     std::cout << "Welcome to Rental Service System!" << std::endl;
     std::cout << "Type number to choose activity: " << std::endl;
@@ -57,13 +66,14 @@ bool userRecognition() {
 
 void lobby() {
     std::cout << "Type number to choose activity: " << std::endl;
-    std::cout << "1: Cars models and statues"  << std::endl;
+    std::cout << "1: Cars models and statues" << std::endl;
     std::cout << "2: Rent a car" << std::endl;
     std::cout << "3: Return a car" << std::endl;
     std::cout << "4: Current rent" << std::endl;
     std::cout << "5: History rent" << std::endl;
     std::cout << "6: Logs" << std::endl;
-    std::cout << "7: Exit" << std::endl;
+    std::cout << "7: Users" << std::endl;
+    std::cout << "8: Exit" << std::endl;
     int activity;
     std::cin >> activity;
     std::string clean;
@@ -100,6 +110,11 @@ void lobby() {
             lobby();
         }
         case 7: {
+            std::cout << "Activity number: " << activity << " - USERS" << std::endl;
+            printUsers();
+            lobby();
+        }
+        case 8: {
             std::cout << "Activity number: " << activity << " - EXIT" << std::endl;
             exit(0);
         }
@@ -209,23 +224,21 @@ bool sign_up() {
 
 int findCarAndItStatus(std::string carModelToMatch) {
     std::map<std::string, std::string> carModelAndStatus;
-    std::ifstream infile("CarsData.txt");
+    std::ifstream file("CarsData.txt");
     std::string carModel;
     std::string carStatus;
 
-    while (std::getline(infile, carModel) && std::getline(infile, carStatus)) {
+    while (std::getline(file, carModel) && std::getline(file, carStatus)) {
         carModelAndStatus.insert(std::pair<std::string, std::string>(carModel, carStatus));
     }
-    infile.close();
+    file.close();
 
     auto ret = carModelAndStatus.find(carModelToMatch);
     if (ret != carModelAndStatus.cend()) {
         if (ret->second == "garage") {
-            //std::cout << "The car is ready to rent." << std::endl;
             return 1;
         }
         if (ret->second == "rented") {
-            //std::cout << "The car is rented right now." << std::endl;
             return 2;
         }
     } else {
@@ -235,25 +248,16 @@ int findCarAndItStatus(std::string carModelToMatch) {
     }
 }
 
-void addCarToData(std::string carModel, std::string carStatus) {
-    std::fstream file("CarsData.txt", std::ios::in | std::ios::out | std::ios::app);
-    if (findCarAndItStatus(carModel) == 3) {
-        file << carModel << std::endl;
-        file << carStatus << std::endl;
-        file.close();
-    }
-}
-
 void printCarModelsAndTheirStatuses() {
     std::map<std::string, std::string> carModelAndStatus;
-    std::ifstream infile("CarsData.txt");
+    std::ifstream file("CarsData.txt");
     std::string carModel;
     std::string carStatus;
 
-    while (std::getline(infile, carModel) && std::getline(infile, carStatus)) {
+    while (std::getline(file, carModel) && std::getline(file, carStatus)) {
         carModelAndStatus.insert(std::pair<std::string, std::string>(carModel, carStatus));
     }
-    infile.close();
+    file.close();
 
     int i = 1;
 
@@ -263,18 +267,18 @@ void printCarModelsAndTheirStatuses() {
     }
     std::cout << std::endl;
 }
-//TODO "type exit if you dont want to rent a car"
+
 void rentCar() {
     std::cout << "Cars ready to rent: " << std::endl;
     std::map<std::string, std::string> carModelAndStatus;
-    std::ifstream infile("CarsData.txt");
+    std::ifstream file("CarsData.txt");
     std::string carModel;
     std::string carStatus;
 
-    while (std::getline(infile, carModel) && std::getline(infile, carStatus)) {
+    while (std::getline(file, carModel) && std::getline(file, carStatus)) {
         carModelAndStatus.insert(std::pair<std::string, std::string>(carModel, carStatus));
     }
-    infile.close();
+    file.close();
 
     int i = 1;
 
@@ -284,25 +288,31 @@ void rentCar() {
             i++;
         }
     }
+    std::cout << i << " Back" << std::endl;
+
 
     std::cout << "Enter car model that you want to rent" << std::endl;
     std::string line;
     getline(std::cin, line);
-    auto ret = carModelAndStatus.find(line);
-    if (ret != carModelAndStatus.cend()) {
-        ret->second = "rented";
+    if (!(line == "Back")) {
+        auto ret = carModelAndStatus.find(line);
+        if (ret != carModelAndStatus.cend()) {
+            ret->second = "rented";
 
-        loggedInUser.currentRent(line);
-        loggedInUser.historyRent(line, "rented");
-        logs(line, "rented");
+            loggedInUser.currentRent(line);
+            loggedInUser.historyRent(line, "rented");
+            logs(line, "rented");
 
+        } else {
+            std::cout << "ERROR" << std::endl;
+        }
     } else {
-        std::cout << "ERROR" << std::endl;
+        std::cout << "BACK" << std::endl;
     }
 
-    std::ofstream file("CarsData.txt");
-    file << "";
-    file.close();
+    std::ofstream fileClean("CarsData.txt");
+    fileClean << "";
+    fileClean.close();
 
     std::fstream fileRewrite("CarsData.txt", std::ios::in | std::ios::out | std::ios::app);
 
@@ -311,82 +321,116 @@ void rentCar() {
         fileRewrite << p.second << std::endl;
     }
 
-    file.close();
+    fileRewrite.close();
 }
 
-//TODO if file is empty print "You dont have any car to return"
 void returnCar() {
     std::map<std::string, std::string> carModelAndStatus;
-    std::ifstream infileCarsData("CarsData.txt");
+    std::ifstream fileCarsData("CarsData.txt");
     std::string carModel;
     std::string carStatus;
 
-    while (std::getline(infileCarsData, carModel) && std::getline(infileCarsData, carStatus)) {
+    while (std::getline(fileCarsData, carModel) && std::getline(fileCarsData, carStatus)) {
         carModelAndStatus.insert(std::pair<std::string, std::string>(carModel, carStatus));
     }
-    infileCarsData.close();
+    fileCarsData.close();
 
     std::map<std::string, std::string> rentedCars;
-    std::ifstream infileRentedCars(loggedInUser.userName + "_currentRent.txt");
+    std::ifstream fileCurrentRent(loggedInUser.userName + "_currentRent.txt");
     std::string rentedCarModel;
     std::string rentedStatus;
 
-    while (std::getline(infileRentedCars, rentedCarModel) && std::getline(infileRentedCars, rentedStatus)) {
-        rentedCars.insert(std::pair<std::string, std::string>(rentedCarModel, rentedStatus));
-    }
-    infileRentedCars.close();
-
-    std::cout << "This is your rented car list, type car model that you want to return:" << std::endl;
-    printCurrentRent();
-
-    std::string line;
-    getline(std::cin, line);
-    auto ret = rentedCars.find(line);
-    if (ret != rentedCars.cend()) {
-        rentedCars.erase(line);
-        loggedInUser.historyRent(line, "returned");
-        logs(line, "returned");
+    if (isEmpty(fileCurrentRent)) {
+        std::cout << "Your current rent list is empty" << std::endl;
     } else {
-        std::cout << "ERROR" << std::endl;
+        while (std::getline(fileCurrentRent, rentedCarModel) && std::getline(fileCurrentRent, rentedStatus)) {
+            rentedCars.insert(std::pair<std::string, std::string>(rentedCarModel, rentedStatus));
+        }
+
+        std::cout << "This is your rented car list, type car model that you want to return:" << std::endl;
+        printCurrentRentForReturn();
+
+
+        std::string line;
+        getline(std::cin, line);
+
+        if (!(line == "Back")) {
+            auto ret = rentedCars.find(line);
+            if (ret != rentedCars.cend()) {
+                rentedCars.erase(line);
+                loggedInUser.historyRent(line, "returned");
+                logs(line, "returned");
+            } else {
+                std::cout << "ERROR" << std::endl;
+            }
+        } else {
+            std::cout << "BACK" << std::endl;
+        }
+
+        std::ofstream fileCleanCurrentRent(loggedInUser.userName + "_currentRent.txt");
+        fileCleanCurrentRent << "";
+        fileCleanCurrentRent.close();
+
+        std::fstream fileRewriteCurrentRent(loggedInUser.userName + "_currentRent.txt",
+                                            std::ios::in | std::ios::out | std::ios::app);
+
+        for (const auto &p: rentedCars) {
+            fileRewriteCurrentRent << p.first << std::endl;
+            fileRewriteCurrentRent << p.second << std::endl;
+        }
+
+        fileRewriteCurrentRent.close();
+
+        auto it = carModelAndStatus.find(line);
+        if (it != rentedCars.cend()) {
+            it->second = "garage";
+        } else {
+            std::cout << "ERROR" << std::endl;
+        }
+
+        std::ofstream fileCleanCarsData("CarsData.txt");
+        fileCleanCarsData << "";
+        fileCleanCarsData.close();
+
+        std::fstream fileRewriteCarsData("CarsData.txt", std::ios::in | std::ios::out | std::ios::app);
+
+        for (const auto &p: carModelAndStatus) {
+            fileRewriteCarsData << p.first << std::endl;
+            fileRewriteCarsData << p.second << std::endl;
+        }
+        fileRewriteCarsData.close();
     }
-
-    std::ofstream fileRented(loggedInUser.userName + "_currentRent.txt");
-    fileRented << "";
-    fileRented.close();
-
-    std::fstream fileRewrite(loggedInUser.userName + "_currentRent.txt", std::ios::in | std::ios::out | std::ios::app);
-
-    for (const auto &p: rentedCars) {
-        fileRewrite << p.first << std::endl;
-        fileRewrite << p.second << std::endl;
-    }
-
-    fileRewrite.close();
-
-    auto it = carModelAndStatus.find(line);
-    if (it != rentedCars.cend()) {
-        it->second = "garage";
-    } else {
-        std::cout << "ERROR" << std::endl;
-    }
-
-    std::ofstream fileData("CarsData.txt");
-    fileData << "";
-    fileData.close();
-
-    std::fstream fileRewriteData("CarsData.txt", std::ios::in | std::ios::out | std::ios::app);
-
-    for (const auto &p: carModelAndStatus) {
-        fileRewriteData << p.first << std::endl;
-        fileRewriteData << p.second << std::endl;
-    }
-
-    fileRewriteData.close();
+    fileCurrentRent.close();
 }
 
-void printWithoutStatus(std::string fileName) {
+void printCurrentRent() {
     std::map<std::string, std::string> carModelAndStatus;
-    std::ifstream file(fileName);
+    std::ifstream file(loggedInUser.userName + "_currentRent.txt");
+    std::string carModel;
+    std::string carStatus;
+
+    if (isEmpty(file)) {
+        std::cout << "Your current rent list is empty" << std::endl;
+    } else {
+        while (std::getline(file, carModel) && std::getline(file, carStatus)) {
+            carModelAndStatus.insert(std::pair<std::string, std::string>(carModel, carStatus));
+        }
+
+        int i = 1;
+
+        for (const auto &p: carModelAndStatus) {
+            std::cout << i << " " << p.first << std::endl;
+            i++;
+        }
+        std::cout << std::endl;
+    }
+    file.close();
+
+}
+
+void printCurrentRentForReturn() {
+    std::map<std::string, std::string> carModelAndStatus;
+    std::ifstream file(loggedInUser.userName + "_currentRent.txt");
     std::string carModel;
     std::string carStatus;
 
@@ -401,31 +445,59 @@ void printWithoutStatus(std::string fileName) {
         std::cout << i << " " << p.first << std::endl;
         i++;
     }
-    std::cout << std::endl;
+    std::cout << i << " Back" << std::endl;
+
 }
 
-void printCurrentRent() {
-    printWithoutStatus(loggedInUser.userName + "_currentRent.txt");
-}
-
-//TODO print every second line
 void printHistoryRent() {
-    printWithoutStatus(loggedInUser.userName + "_rentHistory.txt");
+    std::ifstream file(loggedInUser.userName + "_rentHistory.txt");
+
+    if(isEmpty(file)){
+        std::cout << "Your history rent list is empty" << std::endl;
+    } else {
+        std::string line;
+        while (std::getline(file, line)) {
+            std::cout << line << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    file.close();
 }
 
 void logs(std::string car, std::string rentOrReturn) {
-    std::fstream file("LogOfActivities.txt", std::ios::in | std::ios::out | std::ios::app);
+    std::fstream file("Logs.txt", std::ios::in | std::ios::out | std::ios::app);
     file << loggedInUser.getUserName() << " " << rentOrReturn << " " << car << " on " << dt;
 }
 
 void printLogs() {
-    std::ifstream infileRentedCars("LogOfActivities.txt");
+    std::ifstream infileRentedCars("Logs.txt");
 
     std::string line;
     while (std::getline(infileRentedCars, line)) {
         std::cout << line << std::endl;
     }
+    std::cout << std::endl;
     infileRentedCars.close();
+}
+
+void printUsers(){
+    std::map<std::string, std::string> userData;
+    std::ifstream file("UserData.txt");
+    std::string userName;
+    std::string password;
+
+    while (std::getline(file, userName) && std::getline(file, password)) {
+        userData.insert(std::pair<std::string, std::string>(userName, password));
+    }
+    file.close();
+
+    int i = 1;
+
+    for (const auto &p: userData) {
+        std::cout << i << " " << p.first << std::endl;
+        i++;
+    }
+    std::cout << std::endl;
 }
 
 void User::setUserName(std::string userName) {
@@ -436,9 +508,9 @@ std::string User::getUserName() {
     return this->userName;
 }
 
-void User::currentRent(std::string rent) {
+void User::currentRent(std::string car) {
     std::fstream file(this->userName + "_currentRent.txt", std::ios::in | std::ios::out | std::ios::app);
-    file << rent << std::endl;
+    file << car << std::endl;
     file << "rented" << std::endl;
     file.close();
 }
@@ -447,4 +519,8 @@ void User::historyRent(std::string car, std::string rentOrReturn) {
     std::fstream file(this->userName + "_rentHistory.txt", std::ios::in | std::ios::out | std::ios::app);
     file << car << " " << rentOrReturn << " on " << dt;
     file.close();
+}
+
+bool isEmpty(std::ifstream &pFile) {
+    return pFile.peek() == std::ifstream::traits_type::eof();
 }
